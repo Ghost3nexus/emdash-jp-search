@@ -1,0 +1,28 @@
+{
+	"$schema": "./node_modules/@emdash-cms/plugin-cli/schemas/emdash-plugin.schema.json",
+
+	"slug": "jp-search",
+	"publisher": "did:plc:tpplaceholder000000000000",
+
+	"license": "MIT",
+	"author": { "name": "TomorrowProof" },
+	"security": { "email": "security@example.com" },
+	"description": "日本語のサイト内検索。FTS5が無い環境でもNグラム索引で日本語を部分一致検索でき、blocks本文も対象にできる。",
+
+	// Trust contract. Reads published content to build its own index;
+	// reads collection definitions so it needs no per-site configuration.
+	// It never writes content, sends mail, or talks to the network.
+	"capabilities": ["content:read", "schema:read"],
+	"allowedHosts": [],
+
+	"storage": {
+		// One record per indexed entry.
+		"docs": {
+			"indexes": ["collection", "locale", "updatedAt", ["collection", "locale"]]
+		},
+		// Inverted index: one record per (token, doc) pair.
+		"postings": {
+			"indexes": ["token", "docId", ["token", "docId"]]
+		}
+	}
+}
