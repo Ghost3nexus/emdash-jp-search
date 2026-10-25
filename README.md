@@ -1,7 +1,11 @@
-# jp-search — Japanese site search for EmDash
+# jp-search — Japanese site search for EmDash on the Node platform
 
-Site search that actually works on a Japanese EmDash site. It keeps its own
-bigram index in plugin storage instead of relying on SQLite FTS5.
+Site search that works in Japanese on an EmDash site running the **Node
+platform**, where EmDash's built-in full-text search cannot run at all. It keeps
+its own bigram index in plugin storage instead of relying on SQLite FTS5.
+
+This is a narrow claim on purpose. See [Where this fits](#where-this-fits) for
+what it does not cover.
 
 ## Why this exists
 
@@ -29,6 +33,32 @@ This plugin sidesteps all three: it reads published content through the plugin
 content API, extracts plain text from `blocks` and Portable Text, and stores a
 character-bigram inverted index in its own storage collections.
 
+## Where this fits
+
+EmDash has other search paths. This plugin is for the one they do not reach.
+
+| Path | Runs on | Japanese |
+| --- | --- | --- |
+| Built-in FTS5 search (`emdash search`, `search()`) | Platforms whose SQLite ships FTS5 — **not** Node's bundled `node:sqlite` | Needs `tokenize: "trigram"`, settable only via `POST /_emdash/api/search/enable` |
+| First-party `@emdash-cms/plugin-ai-search` (Cloudflare AI Search) | **Cloudflare Workers only** — requires an `ai_search_namespaces` binding | Out of scope here |
+| **jp-search** | **Node platform** (`@astrojs/node` + `node:sqlite`) | Character bigrams, no FTS5 needed |
+
+So the accurate claim is: *on the Node platform, this is how you get Japanese site
+search to work at all* — not that it is the best way to search any Japanese EmDash
+site. A site already on Cloudflare Workers, with the budget for an AI Search
+instance, should look at the first-party plugin first.
+
+Measured against upstream `main` on 2026-10-25, both of the gaps this plugin
+depends on are still open:
+
+- `@emdash-cms/plugin-ai-search` is documented (`docs/plugins/ai-search.mdx`) and
+  staged in a changeset, but **not yet published to npm** (registry returns 404).
+- `DEFAULT_SEARCH_TOKENIZER` in `packages/core/src/search/fts-manager.ts` is still
+  `porter unicode61`. The allow-list is unchanged (`porter unicode61`,
+  `unicode61`, `trigram`) and no CJK tokenizer has been added.
+
+Re-check both before quoting this plugin as the only option.
+
 ## What it does
 
 - Indexes every **published** entry of every collection. Drafts, scheduled and
@@ -45,12 +75,12 @@ character-bigram inverted index in its own storage collections.
 
 ## Install
 
-```sh
-pnpm add @tomorrowproof/emdash-jp-search
-```
+Published to the EmDash plugin registry as
+[`@kooochan88.bsky.social/jp-search`](https://plugins.emdashcms.com/plugins/@kooochan88.bsky.social/jp-search).
+Open **Registry** in your EmDash admin and search for that name.
 
-Then enable it in the admin and approve its access: `content:read` and
-`schema:read`. It never writes content, sends mail, or makes network requests.
+Then approve its access: `content:read` and `schema:read`. It never writes
+content, sends mail, or makes network requests.
 
 ## Routes
 
@@ -136,8 +166,9 @@ pnpm run test         # validate + vitest
 pnpm run build
 ```
 
-Before publishing, replace the placeholder `publisher` DID in
-`emdash-plugin.jsonc` with the publisher's real atproto DID.
+The `publisher` DID in `emdash-plugin.jsonc` resolves to
+`kooochan88.bsky.social`. Publishing goes through `emdash-plugin login` and then
+`emdash-plugin publish`, which uploads to that account's own PDS.
 
 ## License
 

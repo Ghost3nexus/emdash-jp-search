@@ -7,7 +7,7 @@
 	"license": "MIT",
 	"author": { "name": "TomorrowProof" },
 	"security": { "email": "kozuki@tomorrowproof-ai.com" },
-	"description": "日本語のサイト内検索。FTS5が無い環境でもNグラム索引で日本語を部分一致検索でき、blocks本文も対象にできる。",
+	"description": "Nodeプラットフォームなど FTS5 が使えない環境向けの日本語サイト内検索。Nグラム索引で部分一致でき、blocks 本文も対象にできる。Cloudflare Workers なら公式の AI Search プラグインが先。",
 
 	// Trust contract. Reads published content to build its own index;
 	// reads collection definitions so it needs no per-site configuration.
