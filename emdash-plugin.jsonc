@@ -2,11 +2,11 @@
 	"$schema": "./node_modules/@emdash-cms/plugin-cli/schemas/emdash-plugin.schema.json",
 
 	"slug": "jp-search",
-	"publisher": "did:plc:tpplaceholder000000000000",
+	"publisher": "did:plc:at3h3l2dw7hrh4maaj3ysx6r",
 
 	"license": "MIT",
 	"author": { "name": "TomorrowProof" },
-	"security": { "email": "security@example.com" },
+	"security": { "email": "kozuki@tomorrowproof-ai.com" },
 	"description": "日本語のサイト内検索。FTS5が無い環境でもNグラム索引で日本語を部分一致検索でき、blocks本文も対象にできる。",
 
 	// Trust contract. Reads published content to build its own index;

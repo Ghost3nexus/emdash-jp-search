@@ -137,7 +137,7 @@ pnpm run build
 ```
 
 Before publishing, replace the placeholder `publisher` DID in
-`emdash-plugin.jsonc` and the placeholder `security.email` with real values.
+`emdash-plugin.jsonc` with the publisher's real atproto DID.
 
 ## License
 
