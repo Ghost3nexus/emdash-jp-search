@@ -76,8 +76,13 @@ Re-check both before quoting this plugin as the only option.
 ## Install
 
 Published to the EmDash plugin registry as
-[`@kooochan88.bsky.social/jp-search`](https://plugins.emdashcms.com/plugins/@kooochan88.bsky.social/jp-search).
+[`@tomorrowproof-ai.com/jp-search`](https://plugins.emdashcms.com/plugins/@tomorrowproof-ai.com/jp-search).
 Open **Registry** in your EmDash admin and search for that name.
+
+The registry derives that name from the publisher's current atproto handle, so it
+moves when the handle does — it was `@kooochan88.bsky.social/jp-search` through
+v0.1.1, and that URL now 404s. The stable identity is the DID,
+`did:plc:at3h3l2dw7hrh4maaj3ysx6r`.
 
 Then approve its access: `content:read` and `schema:read`. It never writes
 content, sends mail, or makes network requests.
@@ -194,9 +199,13 @@ pnpm run test         # validate + vitest
 pnpm run build
 ```
 
-The `publisher` DID in `emdash-plugin.jsonc` resolves to
-`kooochan88.bsky.social`. Publishing goes through `emdash-plugin login` and then
-`emdash-plugin publish`, which uploads to that account's own PDS.
+The `publisher` DID in `emdash-plugin.jsonc` resolves to the handle
+`tomorrowproof-ai.com`. Publishing goes through `emdash-plugin login` and then
+`emdash-plugin publish`, which uploads to that account's own PDS. The manifest
+pins the DID rather than the handle on purpose, so a handle change does not break
+publishing — but it does rename the package, so re-read the Install section after
+one. `emdash-plugin info` also fails on a stale handle
+(`MANIFEST_PUBLISHER_UNRESOLVED`); pass the DID instead.
 
 ## License
 
