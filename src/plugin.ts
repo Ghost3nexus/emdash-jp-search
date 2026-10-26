@@ -1,5 +1,6 @@
 import type { PluginContext, SandboxedPlugin } from "emdash/plugin";
 
+import { type AdminDeps, type IndexStatus, renderAdmin } from "./admin.js";
 import { entryText, isSinglePhrase, normalize, snippet, tokenize } from "./text.js";
 
 /**
@@ -140,17 +141,18 @@ const plugin: SandboxedPlugin = {
 		status: {
 			permission: "plugins:manage",
 			handler: async (_routeCtx, ctx) => {
-				const docs = await ctx.storage.docs.count();
-				const postings = await ctx.storage.postings.count();
-				const lastRun = await ctx.kv.get<string>("state:lastReindexAt");
-				const truncated = await ctx.kv.get<boolean>("state:lastReindexTruncated");
-				return {
-					ok: true,
-					documents: docs,
-					tokens: postings,
-					lastReindexAt: lastRun ?? null,
-					lastReindexTruncated: truncated ?? false,
-				};
+				return { ok: true, ...(await readStatus(ctx)) };
+			},
+		},
+
+		/**
+		 * Block Kit admin screen. The host dispatches every page, widget, button
+		 * and form interaction to this one route by name.
+		 */
+		admin: {
+			permission: "plugins:manage",
+			handler: async (routeCtx, ctx) => {
+				return await renderAdmin(routeCtx.input, adminDeps(ctx), routeCtx.ui?.locale);
 			},
 		},
 
@@ -175,6 +177,26 @@ export default plugin;
 // ---------------------------------------------------------------------------
 
 type Ctx = PluginContext;
+
+/** Measured, not cached: the admin screen exists to show the real numbers. */
+async function readStatus(ctx: Ctx): Promise<IndexStatus> {
+	return {
+		documents: await ctx.storage.docs.count(),
+		tokens: await ctx.storage.postings.count(),
+		lastReindexAt: (await ctx.kv.get<string>("state:lastReindexAt")) ?? null,
+		lastReindexTruncated: (await ctx.kv.get<boolean>("state:lastReindexTruncated")) ?? false,
+	};
+}
+
+/** The admin screen reaches the index through the same calls the routes use. */
+function adminDeps(ctx: Ctx): AdminDeps {
+	return {
+		readStatus: () => readStatus(ctx),
+		reindexAll: () => reindexAll(ctx),
+		search: (query) => runSearch(ctx, query, {}),
+		maxIndexedEntries: MAX_INDEXED_ENTRIES,
+	};
+}
 
 async function reindexAll(ctx: Ctx): Promise<{ indexed: number; truncated: boolean }> {
 	const collections = (await ctx.schema?.listCollections()) ?? [];

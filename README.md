@@ -82,6 +82,30 @@ Open **Registry** in your EmDash admin and search for that name.
 Then approve its access: `content:read` and `schema:read`. It never writes
 content, sends mail, or makes network requests.
 
+## Admin screen
+
+**日本語検索** in the admin sidebar, plus an **index-health** dashboard widget.
+Both are Block Kit; the plugin ships no browser code.
+
+The screen exists because this index is invisible from everywhere else in EmDash.
+Built-in search reports nothing about it, so an index that is empty — or that was
+cut off at the rebuild cap — looks exactly like a site with no matching content.
+The screen shows:
+
+- **Index health.** Indexed entries, index entries (bigram-and-entry pairs), and
+  when the last full rebuild ran.
+- **A warning when the index is empty**, and a separate one when the last rebuild
+  stopped at the cap. Both are plain statements of what was measured — an empty
+  index is normal on a site with no published entries, and the banner says so.
+- **Rebuild the index**, behind a confirmation. Same work as `POST reindex`.
+- **A search box** that runs the same code path the public route serves — same
+  tokenizer, same scoring, same order — minus that route's `locale` and
+  `collection` filters.
+
+Wording follows the admin locale the host attests (`routeCtx.ui.locale`):
+Japanese for a Japanese admin, English otherwise. The sidebar label is fixed in
+the manifest and cannot follow the locale, so it stays Japanese.
+
 ## Routes
 
 | Route      | Access           | Purpose                                  |
@@ -89,8 +113,9 @@ content, sends mail, or makes network requests.
 | `search`   | public, `GET`    | `?q=…&limit=…&locale=…&collection=…`     |
 | `status`   | `plugins:manage` | document and token counts, last rebuild  |
 | `reindex`  | `plugins:manage`, `POST` | rebuild the whole index          |
+| `admin`    | `plugins:manage`, `POST` | Block Kit for the screen above   |
 
-All three are mounted under `/_emdash/api/plugins/jp-search/`. Plugin routes
+All four are mounted under `/_emdash/api/plugins/jp-search/`. Plugin routes
 answer inside the standard EmDash envelope, so the search payload is at
 `data`:
 
@@ -154,7 +179,10 @@ document and token counts.
 - **Bigrams, not morphology.** There is no stemming, no conjugation handling and
   no synonym expansion. A one-character query matches only a one-character CJK
   run.
-- **No admin screen yet.** Operate it through the `status` and `reindex` routes.
+- **The admin search box is a check, not a console.** It shows the first 20 hits
+  with no paging, and no locale or collection filter — those live on the `search`
+  route. A rebuild started from the button runs inside that one request, so a
+  large site will sit on it; `POST reindex` has the same shape.
 
 ## Development
 

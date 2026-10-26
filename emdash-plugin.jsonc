@@ -15,6 +15,16 @@
 	"capabilities": ["content:read", "schema:read"],
 	"allowedHosts": [],
 
+	// Block Kit admin surface. Both of these are rendered by the single `admin`
+	// route, which is where the host dispatches every page, widget and button.
+	// The labels cannot follow the admin locale — the manifest is static — so
+	// they stay Japanese like the description; the screen itself reads
+	// `routeCtx.ui.locale` and answers in Japanese or English.
+	"admin": {
+		"pages": [{ "path": "/jp-search", "label": "日本語検索", "icon": "search" }],
+		"widgets": [{ "id": "index-health", "title": "日本語検索の索引", "size": "third" }]
+	},
+
 	"storage": {
 		// One record per indexed entry.
 		"docs": {
